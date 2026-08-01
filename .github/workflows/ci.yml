@@ -1,0 +1,63 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  nextjs-tests:
+    name: Build & Test Next.js App
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Next.js Dependencies
+        run: |
+          cd nextjs-app
+          npm ci
+
+      - name: Run Prisma Generate
+        run: |
+          cd nextjs-app
+          npx prisma generate
+
+      - name: Run Vitest Suite
+        run: |
+          cd nextjs-app
+          npm run test -- --run
+
+      - name: Build Next.js
+        run: |
+          cd nextjs-app
+          npm run build
+
+  agents-service-tests:
+    name: Test Python Agents Microservice
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install Agent Service Dependencies
+        run: |
+          cd agents-service
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Pytest
+        run: |
+          cd agents-service
+          pytest tests/
