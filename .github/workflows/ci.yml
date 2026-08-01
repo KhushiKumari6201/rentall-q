@@ -19,24 +19,22 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install Next.js Dependencies
+      - name: Install Frontend Dependencies
         run: |
-          cd nextjs-app
+          cd frontend
           npm ci
-
-      - name: Run Prisma Generate
-        run: |
-          cd nextjs-app
-          npx prisma generate
 
       - name: Run Vitest Suite
         run: |
-          cd nextjs-app
+          cd frontend
           npm run test -- --run
 
-      - name: Build Next.js
+      - name: Build Next.js App
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: "https://placeholder.supabase.co"
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: "placeholder-anon-key"
         run: |
-          cd nextjs-app
+          cd frontend
           npm run build
 
   agents-service-tests:
@@ -60,4 +58,4 @@ jobs:
       - name: Run Pytest
         run: |
           cd agents-service
-          pytest tests/
+          PYTHONPATH=. pytest tests/
