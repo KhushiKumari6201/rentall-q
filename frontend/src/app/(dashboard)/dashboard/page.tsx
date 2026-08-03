@@ -1,63 +1,76 @@
-import Link from 'next/link';
+'use client';
 
-export default function DashboardPage() {
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-white">Dashboard Overview</h1>
-        <p className="text-sm text-slate-400">Welcome to your RentAll-Q business management portal</p>
+import { useEffect, useState } from 'react';
+import { DashboardOverview } from '@/features/dashboard/components/DashboardOverview';
+import { Card } from '@/components/ui/Card';
+import { createClient } from '@/server/lib/supabaseClient';
+
+export default function SmartDashboardPage() {
+  const supabase = createClient();
+  const [role, setRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function checkRole() {
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .maybeSingle();
+
+          setRole(profile?.role || 'BUSINESS_OWNER');
+        } else {
+          setRole('BUSINESS_OWNER');
+        }
+      } catch (err) {
+        setRole('BUSINESS_OWNER');
+      }
+    }
+
+    checkRole();
+  }, []);
+
+  if (role === 'CLIENT') {
+    return (
+      <div className="space-y-6 text-navy-900 font-sans">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-navy-900 font-serif">
+            My Active Bookings
+          </h1>
+          <p className="text-sm text-stone-500 mt-1">
+            View your rental unit subscriptions, leases, and reservation details.
+          </p>
+        </div>
+
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <Card className="border-stone-200">
+            <div className="flex items-center justify-between pb-3 mb-3 border-b border-stone-100">
+              <span className="text-xs font-semibold text-stone-400 uppercase tracking-wider">Unit 102 — Storage Locker</span>
+              <span className="text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded border border-emerald-100">
+                ACTIVE
+              </span>
+            </div>
+            <div className="space-y-2 text-xs text-stone-600">
+              <div className="flex justify-between">
+                <span>Lease Period:</span>
+                <span className="font-semibold text-navy-900">Jan 01, 2026 - Dec 31, 2026</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Monthly Rate:</span>
+                <span className="font-semibold text-navy-900">$250.00 / month</span>
+              </div>
+            </div>
+          </Card>
+        </div>
       </div>
+    );
+  }
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-          <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Bookings</div>
-          <div className="mt-2 text-3xl font-bold text-white">24</div>
-          <div className="mt-1 text-xs text-emerald-400">↑ 12% from last month</div>
-        </div>
-
-        <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-          <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">Rental Units</div>
-          <div className="mt-2 text-3xl font-bold text-white">8</div>
-          <div className="mt-1 text-xs text-sky-400">6 Available • 2 Booked</div>
-        </div>
-
-        <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-          <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">Active Customers</div>
-          <div className="mt-2 text-3xl font-bold text-white">15</div>
-          <div className="mt-1 text-xs text-slate-400">Registered clients</div>
-        </div>
-
-        <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-          <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">Monthly Revenue</div>
-          <div className="mt-2 text-3xl font-bold text-emerald-400">$4,850</div>
-          <div className="mt-1 text-xs text-emerald-400">On target</div>
-        </div>
-      </div>
-
-      <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-6">
-        <h2 className="text-lg font-bold text-white">Quick Actions</h2>
-        <p className="text-xs text-slate-400">Jump directly to your operational modules</p>
-        <div className="mt-4 flex flex-wrap gap-3">
-          <Link
-            href="/bookings"
-            className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-500"
-          >
-            Manage Bookings
-          </Link>
-          <Link
-            href="/customers"
-            className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-700"
-          >
-            View Customers
-          </Link>
-          <Link
-            href="/rental-units"
-            className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-700"
-          >
-            Rental Units
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
+  // Business Owner, Manager, Staff all see the full Business DashboardOverview
+  return <DashboardOverview />;
 }

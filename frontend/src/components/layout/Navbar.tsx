@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/server/lib/supabaseClient';
+import { LogOut } from 'lucide-react';
 
 interface UserProfile {
   name: string;
@@ -29,7 +30,7 @@ export function Navbar() {
         }
 
         // Fetch profile from public.profiles
-        const { data, error } = await supabase
+        const { data } = await supabase
           .from('profiles')
           .select('name, role')
           .eq('id', user.id)
@@ -64,33 +65,50 @@ export function Navbar() {
     router.refresh();
   };
 
+  const getInitials = (name: string) => {
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return name.slice(0, 2).toUpperCase();
+  };
+
   return (
-    <header className="flex h-16 items-center justify-between border-b border-slate-800 bg-slate-900/60 px-6 backdrop-blur-sm text-slate-100">
+    <header className="flex h-16 items-center justify-between border-b border-stone-200 bg-white px-6 text-navy-900 shadow-xs">
       <div className="flex items-center gap-2">
-        <span className="text-sm font-semibold text-slate-300">Workspace Management</span>
+        <span className="text-xs font-semibold uppercase tracking-wider text-stone-400">
+          Management Portal
+        </span>
       </div>
 
       <div className="flex items-center gap-4">
         {loading ? (
-          <div className="h-4 w-24 animate-pulse rounded bg-slate-800" />
+          <div className="h-8 w-32 animate-pulse rounded-lg bg-cream-200" />
         ) : profile ? (
           <div className="flex items-center gap-3">
-            <div className="text-right">
-              <div className="text-sm font-semibold text-white">{profile.name}</div>
-              <div className="text-[11px] text-slate-400">{profile.email}</div>
+            {/* Avatar Circle */}
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-navy-900/10 font-bold text-navy-900 text-xs shadow-xs border border-navy-200/60">
+              {getInitials(profile.name)}
             </div>
-            <span className="rounded bg-sky-950 px-2 py-0.5 text-xs font-semibold text-sky-400 border border-sky-800/40 uppercase">
-              {profile.role}
-            </span>
+
+            <div className="text-left hidden sm:block">
+              <div className="text-xs font-bold text-navy-900 leading-tight">
+                {profile.name}
+              </div>
+              <div className="text-[10px] font-medium text-stone-500">
+                {profile.role} &bull; {profile.email}
+              </div>
+            </div>
           </div>
         ) : null}
 
         <button
           type="button"
           onClick={handleSignOut}
-          className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-200 transition hover:bg-rose-900/40 hover:text-rose-300 hover:border-rose-700/50"
+          title="Sign out"
+          className="flex h-9 w-9 items-center justify-center rounded-lg border border-stone-200 bg-white text-stone-500 transition hover:bg-cream-100 hover:text-navy-900 focus:outline-none focus:ring-2 focus:ring-stone-200"
         >
-          Sign Out
+          <LogOut className="h-4 w-4" />
         </button>
       </div>
     </header>

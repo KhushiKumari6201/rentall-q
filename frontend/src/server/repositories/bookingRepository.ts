@@ -28,8 +28,8 @@ export class BookingRepository {
     };
   }
 
-  async findAll(): Promise<BookingRecord[]> {
-    const { data, error } = await this.client
+  async findAll(businessId?: string): Promise<BookingRecord[]> {
+    let query = this.client
       .from('bookings')
       .select(`
         id,
@@ -44,6 +44,12 @@ export class BookingRepository {
         rentalUnit:rental_units(name)
       `)
       .order('created_at', { ascending: false });
+
+    if (businessId) {
+      query = query.eq('business_id', businessId);
+    }
+
+    const { data, error } = await query;
 
     if (error) throw error;
     return (data || []).map((record) => this.mapToRecord(record));
@@ -80,17 +86,24 @@ export class BookingRepository {
     endDate: Date;
     totalAmount: number;
     status: BookingStatus;
+    businessId?: string;
   }): Promise<BookingRecord> {
+    const payload: any = {
+      customer_id: input.customerId,
+      rental_unit_id: input.rentalUnitId,
+      start_date: input.startDate.toISOString(),
+      end_date: input.endDate.toISOString(),
+      total_amount: input.totalAmount,
+      status: input.status,
+    };
+
+    if (input.businessId) {
+      payload.business_id = input.businessId;
+    }
+
     const { data: inserted, error: insertError } = await this.client
       .from('bookings')
-      .insert({
-        customer_id: input.customerId,
-        rental_unit_id: input.rentalUnitId,
-        start_date: input.startDate.toISOString(),
-        end_date: input.endDate.toISOString(),
-        total_amount: input.totalAmount,
-        status: input.status,
-      })
+      .insert(payload)
       .select('id')
       .single();
 
@@ -118,9 +131,9 @@ export class BookingRepository {
     return record;
   }
 
-  // Signature aliases for seamless compatibility across codebase
-  async listBookings(): Promise<BookingRecord[]> {
-    return this.findAll();
+  // Signature aliases for seamless compatibility
+  async listBookings(businessId?: string): Promise<BookingRecord[]> {
+    return this.findAll(businessId);
   }
 
   async getBookingById(id: string): Promise<BookingRecord | null> {
@@ -134,6 +147,7 @@ export class BookingRepository {
     endDate: Date;
     totalAmount: number;
     status: BookingStatus;
+    businessId?: string;
   }): Promise<BookingRecord> {
     return this.create(input);
   }
@@ -143,6 +157,5 @@ export class BookingRepository {
   }
 }
 
-// Retain PrismaBookingRepository name export to maintain 100% backwards compatibility with existing imports
 export const PrismaBookingRepository = BookingRepository;
 export type PrismaBookingRepository = BookingRepository;

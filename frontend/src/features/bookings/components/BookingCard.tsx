@@ -1,4 +1,9 @@
+'use client';
+
 import { BookingRecord } from '@/server/use-cases/bookings/types';
+import { Card } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
+import { Select } from '@/components/ui/Select';
 
 interface BookingCardProps {
   booking: BookingRecord;
@@ -7,31 +12,50 @@ interface BookingCardProps {
 
 export function BookingCard({ booking, onStatusChange }: BookingCardProps) {
   return (
-    <article className="rounded-xl border border-slate-700 bg-slate-900/50 p-4 text-sm text-slate-100 shadow-sm">
-      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-        <div className="space-y-1">
-          <div><span className="font-semibold text-slate-300">Booking:</span> {booking.id}</div>
-          <div><span className="font-semibold text-slate-300">Customer:</span> {booking.customerName ?? booking.customerId}</div>
-          <div><span className="font-semibold text-slate-300">Rental unit:</span> {booking.rentalUnitName ?? booking.rentalUnitId}</div>
-          <div><span className="font-semibold text-slate-300">Period:</span> {new Date(booking.startDate).toLocaleDateString()} → {new Date(booking.endDate).toLocaleDateString()}</div>
-          <div><span className="font-semibold text-slate-300">Total:</span> ${booking.totalAmount}</div>
+    <Card className="border-slate-200 shadow-sm">
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div className="space-y-1.5 text-sm">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-slate-500 text-xs uppercase">Booking ID:</span>
+            <span className="font-mono text-slate-900 font-bold">{booking.id}</span>
+          </div>
+          <div>
+            <span className="font-medium text-slate-500">Customer:</span>{' '}
+            <span className="font-semibold text-slate-900">{booking.customerName ?? booking.customerId}</span>
+          </div>
+          <div>
+            <span className="font-medium text-slate-500">Rental Unit:</span>{' '}
+            <span className="font-semibold text-slate-900">{booking.rentalUnitName ?? booking.rentalUnitId}</span>
+          </div>
+          <div>
+            <span className="font-medium text-slate-500">Period:</span>{' '}
+            <span className="text-slate-800 font-medium">
+              {new Date(booking.startDate).toLocaleDateString()} &rarr; {new Date(booking.endDate).toLocaleDateString()}
+            </span>
+          </div>
+          <div>
+            <span className="font-medium text-slate-500">Total Amount:</span>{' '}
+            <span className="font-bold text-emerald-600">₹{booking.totalAmount}</span>
+          </div>
         </div>
 
-        <div className="grid gap-2">
-          <span className="rounded bg-slate-800 px-2 py-1 text-xs font-medium uppercase tracking-wide text-sky-300">{booking.status}</span>
-          <select
+        <div className="flex flex-col gap-2 min-w-[140px]">
+          <Badge status={booking.status} className="self-start">
+            {booking.status}
+          </Badge>
+          <Select
             value={booking.status}
             onChange={(event) => onStatusChange(booking.id, event.target.value)}
-            className="rounded border border-slate-600 bg-slate-950 px-2 py-1 text-sm text-slate-100"
+            className="text-xs"
           >
             <option value="PENDING">PENDING</option>
             <option value="CONFIRMED">CONFIRMED</option>
             <option value="ACTIVE">ACTIVE</option>
             <option value="COMPLETED">COMPLETED</option>
             <option value="CANCELLED">CANCELLED</option>
-          </select>
+          </Select>
         </div>
       </div>
-    </article>
+    </Card>
   );
 }

@@ -1,20 +1,22 @@
 import React from 'react';
 
-interface CardProps {
+export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   title?: string;
   subtitle?: string;
-  children: React.ReactNode;
   action?: React.ReactNode;
 }
 
-export const Card: React.FC<CardProps> = ({ title, subtitle, children, action }) => {
+export function Card({ className = '', children, title, subtitle, action, ...props }: CardProps) {
   return (
-    <div className="glass-card">
-      {(title || action) && (
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+    <div
+      className={`rounded-2xl border border-stone-200/80 bg-white p-6 shadow-sm transition-all ${className}`}
+      {...props}
+    >
+      {(title || subtitle || action) && (
+        <div className="flex items-center justify-between pb-4 mb-4 border-b border-stone-100">
           <div>
-            {title && <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: 'white' }}>{title}</h3>}
-            {subtitle && <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginTop: '2px' }}>{subtitle}</p>}
+            {title && <h3 className="text-lg font-bold tracking-tight text-navy-900 font-serif">{title}</h3>}
+            {subtitle && <p className="text-xs text-stone-500">{subtitle}</p>}
           </div>
           {action && <div>{action}</div>}
         </div>
@@ -22,4 +24,44 @@ export const Card: React.FC<CardProps> = ({ title, subtitle, children, action })
       {children}
     </div>
   );
-};
+}
+
+export function CardHeader({ className = '', children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div className={`flex flex-col space-y-1.5 pb-4 ${className}`} {...props}>
+      {children}
+    </div>
+  );
+}
+
+export function CardTitle({ className = '', children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
+  return (
+    <h3 className={`text-lg font-bold tracking-tight text-navy-900 font-serif ${className}`} {...props}>
+      {children}
+    </h3>
+  );
+}
+
+export function CardDescription({ className = '', children, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
+  return (
+    <p className={`text-xs text-stone-500 ${className}`} {...props}>
+      {children}
+    </p>
+  );
+}
+
+export function CardContent({ className = '', children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div className={`pt-0 ${className}`} {...props}>
+      {children}
+    </div>
+  );
+}
+
+export function CardFooter({ className = '', children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div className={`flex items-center pt-4 border-t border-stone-100 ${className}`} {...props}>
+      {children}
+    </div>
+  );
+}
