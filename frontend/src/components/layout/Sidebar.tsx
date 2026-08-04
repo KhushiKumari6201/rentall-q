@@ -60,6 +60,7 @@ export function Sidebar() {
     { label: 'Clients', href: '/business/customers', altHref: '/customers', icon: Users, roles: ['BUSINESS_OWNER', 'MANAGER', 'STAFF'] },
     { label: 'Rental Units', href: '/business/rental-units', altHref: '/rental-units', icon: Home, roles: ['BUSINESS_OWNER', 'MANAGER', 'STAFF'] },
     { label: 'Payments', href: '/business/payments', altHref: '/payments', icon: CreditCard, roles: ['BUSINESS_OWNER', 'MANAGER', 'STAFF'] },
+    { label: 'Companies', href: '/business/company-associated', altHref: '/company-associated', icon: Building2, roles: ['BUSINESS_OWNER'] },
     { label: 'Reports', href: '/business/reports', altHref: '/reports', icon: BarChart3, roles: ['BUSINESS_OWNER', 'MANAGER'] },
     { label: 'Settings & Billing', href: '/business/settings', altHref: '/settings', icon: Settings, roles: ['BUSINESS_OWNER'] },
   ];

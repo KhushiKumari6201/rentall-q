@@ -25,6 +25,7 @@ export function Navbar({ onOpenTrialModal }: NavbarProps) {
     { label: 'Features', href: '#features' },
     { label: 'Pricing', href: '#pricing' },
     { label: 'AI Agents', href: '#ai-agents' },
+    { label: 'Companies', href: '#companies' },
     { label: 'About', href: '#about' },
     { label: 'Blog', href: '#blog' },
     { label: 'Contact', href: '/contact' },

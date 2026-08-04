@@ -6,6 +6,7 @@ import { HeroSection } from '@/components/landing/HeroSection';
 import { IndustryMarquee } from '@/components/landing/IndustryMarquee';
 import { FeatureGrid } from '@/components/landing/FeatureGrid';
 import { PricingSection } from '@/components/landing/PricingSection';
+import { CompaniesSection } from '@/components/landing/CompaniesSection';
 import { FaqSection } from '@/components/landing/FaqSection';
 import { FinalCta } from '@/components/landing/FinalCta';
 import { Footer } from '@/components/landing/Footer';
@@ -41,7 +42,10 @@ export function LandingPage() {
       {/* Section 5: Pricing Section with Spring Toggle */}
       <PricingSection onOpenTrialModal={handleOpenTrialModal} />
 
-      {/* Section 6: Animated FAQ Accordion */}
+      {/* Section 6: Companies Associated */}
+      <CompaniesSection />
+
+      {/* Section 7: Animated FAQ Accordion */}
       <FaqSection />
 
       {/* Section 7: Final CTA Banner with Magnetic Button */}
