@@ -6,11 +6,11 @@ import { Card } from '@/components/ui/Card';
 import { createClient } from '@/server/lib/supabaseClient';
 
 export default function SmartDashboardPage() {
-  const supabase = createClient();
   const [role, setRole] = useState<string | null>(null);
 
   useEffect(() => {
     async function checkRole() {
+      const supabase = createClient();
       try {
         const {
           data: { user },

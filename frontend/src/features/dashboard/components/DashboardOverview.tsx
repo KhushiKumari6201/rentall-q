@@ -17,7 +17,8 @@ import {
   Wrench,
   PieChart as PieIcon,
   RefreshCw,
-  ClipboardList,
+  UserPlus,
+  PlusCircle,
   ArrowRight,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -25,15 +26,24 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { createClient } from '@/server/lib/supabaseClient';
 import { AIAgentCard } from '@/features/ai-advisor/components/AIAgentCard';
 import { AIAgentOutput } from '@/app/api/ai-agents/route';
+import { RevenueChart } from './RevenueChart';
+import { RecentActivityFeed } from './RecentActivityFeed';
+import { QuickActionsModal, ActionType } from './QuickActionsModal';
+import { StaffManagementSection } from './StaffManagementSection';
+import { BillingSubscriptionCard } from './BillingSubscriptionCard';
+import { ReportsAccessWidget } from './ReportsAccessWidget';
 
 export function DashboardOverview() {
-  const supabase = createClient();
   const shouldReduceMotion = useReducedMotion();
 
+  const [mounted, setMounted] = useState(false);
   const [userName, setUserName] = useState<string>('User');
   const [userRole, setUserRole] = useState<'BUSINESS_OWNER' | 'MANAGER' | 'STAFF'>('BUSINESS_OWNER');
   const [recommendations, setRecommendations] = useState<AIAgentOutput[]>([]);
   const [appliedNotification, setAppliedNotification] = useState<string | null>(null);
+
+  // Quick Action Modal State
+  const [activeModal, setActiveModal] = useState<ActionType>(null);
 
   // Animated Stat Values
   const [customersCount, setCustomersCount] = useState(0);
@@ -58,6 +68,8 @@ export function DashboardOverview() {
 
   // Count-up animation logic on mount
   useEffect(() => {
+    const supabase = createClient();
+    setMounted(true);
     async function loadUserData() {
       try {
         const {
@@ -76,6 +88,19 @@ export function DashboardOverview() {
 
           if (profile?.role) {
             setUserRole(profile.role as any);
+          }
+        } else {
+          const demoRole = typeof document !== 'undefined'
+            ? document.cookie
+                .split('; ')
+                .find((row) => row.startsWith('rentallq_demo_session='))
+                ?.split('=')[1]
+            : null;
+          if (demoRole) {
+            setUserRole(demoRole as any);
+            setUserName(
+              demoRole === 'BUSINESS_OWNER' ? 'Business Owner' : demoRole === 'MANAGER' ? 'Manager' : 'Staff Member'
+            );
           }
         }
       } catch (err) {
@@ -111,11 +136,16 @@ export function DashboardOverview() {
     return () => clearInterval(timer);
   }, [shouldReduceMotion]);
 
+  // Handle Toast Notification
+  const triggerNotification = (msg: string) => {
+    setAppliedNotification(msg);
+    setTimeout(() => setAppliedNotification(null), 4000);
+  };
+
   // Handle Recommendation Apply
   const handleApply = (id: string, title: string) => {
     setRecommendations((prev) => prev.filter((r) => r.id !== id));
-    setAppliedNotification(`Applied recommendation: "${title}" successfully.`);
-    setTimeout(() => setAppliedNotification(null), 3500);
+    triggerNotification(`Applied AI recommendation: "${title}" successfully.`);
   };
 
   // Handle Recommendation Dismiss
@@ -154,14 +184,14 @@ export function DashboardOverview() {
     switch (userRole) {
       case 'BUSINESS_OWNER':
         return {
-          badge: 'Business Owner Panel',
+          badge: 'Business Owner Portal',
           icon: Crown,
-          desc: 'Portfolio performance overview, revenue analytics & AI decision support.',
+          desc: 'Full operational control, financial telemetry, AI decision support & staff management.',
           badgeColor: 'bg-amber-50 text-amber-800 border-amber-200',
         };
       case 'MANAGER':
         return {
-          badge: 'Manager Panel',
+          badge: 'Manager Portal',
           icon: Briefcase,
           desc: 'Operational management across bookings, team seats, payments & reports.',
           badgeColor: 'bg-sky-50 text-sky-800 border-sky-200',
@@ -187,8 +217,7 @@ export function DashboardOverview() {
   const HeaderIcon = headerInfo.icon;
 
   return (
-    <div className="space-y-8 text-navy-900 font-sans antialiased">
-      
+    <div className="space-y-8 text-navy-900 font-sans antialiased pb-12">
       {/* Top Welcome Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-6 rounded-2xl border border-stone-200/80 shadow-xs">
         <div>
@@ -212,34 +241,61 @@ export function DashboardOverview() {
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-stone-200 bg-cream-50 text-xs font-semibold text-navy-900 hover:bg-cream-100 transition cursor-pointer"
           >
             <RefreshCw className="h-3.5 w-3.5 text-stone-500" />
-            <span>Refresh</span>
+            <span>Refresh Telemetry</span>
           </button>
         </div>
       </div>
 
-      {/* STAFF SPECIFIC QUICK ACTION BAR */}
-      {userRole === 'STAFF' && (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-5 space-y-3">
+      {/* QUICK ACTIONS SHORTCUT BAR */}
+      <div className="rounded-2xl border border-amber-200/90 bg-amber-50/40 p-5 space-y-3">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Wrench className="h-4 w-4 text-emerald-700" />
-            <h2 className="text-sm font-bold text-navy-900 font-serif">Quick Staff Operations</h2>
+            <PlusCircle className="h-4.5 w-4.5 text-amber-700" />
+            <h2 className="text-sm font-bold text-navy-900 font-serif">Quick Actions Shortcuts</h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <Link href="/business/bookings" className="flex items-center justify-between p-3.5 bg-white rounded-xl border border-stone-200 shadow-2xs hover:border-emerald-400 transition">
-              <span className="text-xs font-bold text-navy-900">+ Record New Booking</span>
-              <ArrowRight className="h-3.5 w-3.5 text-emerald-700" />
-            </Link>
-            <Link href="/business/payments" className="flex items-center justify-between p-3.5 bg-white rounded-xl border border-stone-200 shadow-2xs hover:border-emerald-400 transition">
-              <span className="text-xs font-bold text-navy-900">+ Log Customer Payment</span>
-              <ArrowRight className="h-3.5 w-3.5 text-emerald-700" />
-            </Link>
-            <Link href="/business/customers" className="flex items-center justify-between p-3.5 bg-white rounded-xl border border-stone-200 shadow-2xs hover:border-emerald-400 transition">
-              <span className="text-xs font-bold text-navy-900">+ Add Client Contact</span>
-              <ArrowRight className="h-3.5 w-3.5 text-emerald-700" />
-            </Link>
-          </div>
+          <span className="text-[11px] text-stone-500 font-medium">1-Click Data Entry</span>
         </div>
-      )}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <button
+            onClick={() => setActiveModal('CUSTOMER')}
+            className="flex items-center justify-between p-3.5 bg-white rounded-xl border border-stone-200 shadow-2xs hover:border-amber-400 hover:shadow-xs transition cursor-pointer text-left"
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="p-1.5 rounded-lg bg-navy-50 text-navy-800">
+                <UserPlus className="h-4 w-4" />
+              </div>
+              <span className="text-xs font-bold text-navy-900">+ Add Customer</span>
+            </div>
+            <ArrowRight className="h-3.5 w-3.5 text-amber-700" />
+          </button>
+
+          <button
+            onClick={() => setActiveModal('UNIT')}
+            className="flex items-center justify-between p-3.5 bg-white rounded-xl border border-stone-200 shadow-2xs hover:border-amber-400 hover:shadow-xs transition cursor-pointer text-left"
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-800">
+                <Home className="h-4 w-4" />
+              </div>
+              <span className="text-xs font-bold text-navy-900">+ Add Rental Unit</span>
+            </div>
+            <ArrowRight className="h-3.5 w-3.5 text-amber-700" />
+          </button>
+
+          <button
+            onClick={() => setActiveModal('BOOKING')}
+            className="flex items-center justify-between p-3.5 bg-white rounded-xl border border-stone-200 shadow-2xs hover:border-amber-400 hover:shadow-xs transition cursor-pointer text-left"
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="p-1.5 rounded-lg bg-sky-50 text-sky-800">
+                <Calendar className="h-4 w-4" />
+              </div>
+              <span className="text-xs font-bold text-navy-900">+ New Booking</span>
+            </div>
+            <ArrowRight className="h-3.5 w-3.5 text-amber-700" />
+          </button>
+        </div>
+      </div>
 
       {/* Applied Notification Toast */}
       <AnimatePresence>
@@ -254,7 +310,7 @@ export function DashboardOverview() {
               <Check className="h-4 w-4 text-emerald-600" />
               <span>{appliedNotification}</span>
             </div>
-            <button onClick={() => setAppliedNotification(null)} className="text-emerald-700 hover:text-emerald-900">
+            <button onClick={() => setAppliedNotification(null)} className="text-emerald-700 hover:text-emerald-900 cursor-pointer">
               <X className="h-4 w-4" />
             </button>
           </motion.div>
@@ -322,7 +378,7 @@ export function DashboardOverview() {
           </div>
         </motion.div>
 
-        {/* Card 4: Monthly Revenue (Hidden for Staff) */}
+        {/* Card 4: Monthly Revenue */}
         {userRole !== 'STAFF' && (
           <motion.div
             variants={cardVariants}
@@ -343,7 +399,7 @@ export function DashboardOverview() {
           </motion.div>
         )}
 
-        {/* Card 5: Occupancy Rate (Recharts Donut Ring Fill-In) */}
+        {/* Card 5: Occupancy Rate */}
         <motion.div
           variants={cardVariants}
           className="rounded-2xl border border-stone-200/80 bg-white p-5 shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden"
@@ -363,30 +419,32 @@ export function DashboardOverview() {
 
             {/* Recharts Donut Ring */}
             <div className="h-14 w-14 relative flex-shrink-0">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={occupancyChartData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={18}
-                    outerRadius={26}
-                    startAngle={90}
-                    endAngle={-270}
-                    dataKey="value"
-                    isAnimationActive={!shouldReduceMotion}
-                  >
-                    {occupancyChartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={donutColors[index % donutColors.length]} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
+              {mounted && (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={occupancyChartData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={18}
+                      outerRadius={26}
+                      startAngle={90}
+                      endAngle={-270}
+                      dataKey="value"
+                      isAnimationActive={!shouldReduceMotion}
+                    >
+                      {occupancyChartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={donutColors[index % donutColors.length]} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </div>
         </motion.div>
 
-        {/* Card 6: Pending Payments (Highlighted in Red/Amber if overdue) */}
+        {/* Card 6: Pending Payments */}
         <motion.div
           variants={cardVariants}
           className="rounded-2xl border border-rose-200/80 bg-rose-50/40 p-5 shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow"
@@ -404,7 +462,7 @@ export function DashboardOverview() {
         </motion.div>
       </motion.div>
 
-      {/* SECTION 2: AI RECOMMENDATIONS PANEL (OWNER & MANAGER ACCESS) */}
+      {/* SECTION 2: AI RECOMMENDATIONS PANEL */}
       {userRole !== 'STAFF' && (
         <div className="space-y-5">
           <div className="flex items-center justify-between">
@@ -458,45 +516,31 @@ export function DashboardOverview() {
         </div>
       )}
 
-      {/* STAFF SPECIFIC DAILY CHECKLIST */}
-      {userRole === 'STAFF' && (
-        <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-xs space-y-4">
-          <div className="flex items-center justify-between border-b border-stone-100 pb-3">
-            <div className="flex items-center gap-2">
-              <ClipboardList className="h-5 w-5 text-emerald-700" />
-              <h2 className="text-lg font-bold text-navy-900 font-serif">Today&apos;s Operational Tasks</h2>
-            </div>
-            <span className="text-xs text-stone-500">3 Pending Tasks</span>
-          </div>
+      {/* SECTION 3: REVENUE FINANCIAL CHART */}
+      <RevenueChart />
 
-          <div className="space-y-3 text-xs text-navy-900">
-            <div className="flex items-center justify-between p-3 bg-cream-50 rounded-xl border border-stone-200/70">
-              <div>
-                <div className="font-bold text-navy-900">Pending Check-in &bull; Storage Unit B12</div>
-                <div className="text-stone-500 text-[11px]">Tenant: Sarah Lin &bull; Scheduled 10:00 AM</div>
-              </div>
-              <span className="px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 font-bold text-[10px]">PENDING CHECK-IN</span>
-            </div>
+      {/* SECTION 4: RECENT ACTIVITY AUDIT FEED */}
+      <RecentActivityFeed />
 
-            <div className="flex items-center justify-between p-3 bg-cream-50 rounded-xl border border-stone-200/70">
-              <div>
-                <div className="font-bold text-navy-900">Record Overdue Cash Payment &bull; Warehouse Bay 4B</div>
-                <div className="text-stone-500 text-[11px]">Tenant: Apex Logistics &bull; Invoice #INV-882</div>
-              </div>
-              <span className="px-2.5 py-1 rounded-full bg-rose-100 text-rose-800 font-bold text-[10px]">OVERDUE PAYMENT</span>
-            </div>
-
-            <div className="flex items-center justify-between p-3 bg-cream-50 rounded-xl border border-stone-200/70">
-              <div>
-                <div className="font-bold text-navy-900">Unit Condition Inspection &bull; Locker 15</div>
-                <div className="text-stone-500 text-[11px]">Post-lease turnaround check</div>
-              </div>
-              <span className="px-2.5 py-1 rounded-full bg-sky-100 text-sky-800 font-bold text-[10px]">INSPECTION</span>
-            </div>
-          </div>
-        </div>
+      {/* SECTION 5: STAFF & MANAGER MANAGEMENT */}
+      {userRole === 'BUSINESS_OWNER' && (
+        <StaffManagementSection onNotify={triggerNotification} />
       )}
 
+      {/* SECTION 6: EXPORTABLE REPORTS ACCESS */}
+      <ReportsAccessWidget onNotify={triggerNotification} />
+
+      {/* SECTION 7: OWNER-ONLY BILLING & SUBSCRIPTION */}
+      {userRole === 'BUSINESS_OWNER' && (
+        <BillingSubscriptionCard onNotify={triggerNotification} />
+      )}
+
+      {/* QUICK ACTIONS MODAL DIALOG */}
+      <QuickActionsModal
+        actionType={activeModal}
+        onClose={() => setActiveModal(null)}
+        onSuccess={triggerNotification}
+      />
     </div>
   );
 }

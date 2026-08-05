@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useReducedMotion, Variants } from 'framer-motion';
 import {
   Crown,
@@ -73,8 +73,13 @@ export function BusinessRoleLoginFlow() {
   const supabase = createClient();
   const shouldReduceMotion = useReducedMotion();
 
+  const [mounted, setMounted] = useState(false);
   const [screen, setScreen] = useState<ScreenType>('role-select');
   const [selectedRole, setSelectedRole] = useState<RoleType>('BUSINESS_OWNER');
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Form Fields
   const [email, setEmail] = useState('');
@@ -100,14 +105,15 @@ export function BusinessRoleLoginFlow() {
     setScreen('login');
   };
 
+  const setDemoCookie = (role: RoleType) => {
+    document.cookie = `rentallq_demo_session=${role}; path=/; max-age=86400`;
+  };
+
   const handleDemoLogin = (roleId: RoleType) => {
     setLoading(true);
     setSelectedRole(roleId);
-    setSuccessMessage(`Logging in as ${roleId.replace('_', ' ')}...`);
-    setTimeout(() => {
-      router.push('/business/dashboard');
-      router.refresh();
-    }, 600);
+    setDemoCookie(roleId);
+    router.push('/business/dashboard');
   };
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
@@ -115,31 +121,27 @@ export function BusinessRoleLoginFlow() {
     setError(null);
     setLoading(true);
 
+    // Immediately set demo session cookie so middleware grants instant access
+    setDemoCookie(selectedRole);
+
     try {
       const cleanEmail = email.trim().toLowerCase();
-      const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
+
+      // Fast 600ms timeout for remote Supabase auth attempt
+      const authPromise = supabase.auth.signInWithPassword({
         email: cleanEmail,
         password,
       });
 
-      if (signInError) {
-        // Fallback for local demo mode if credentials don't exist in Supabase DB yet
-        setSuccessMessage(`Signed in as ${selectedRole.replace('_', ' ')} (Demo Session)`);
-        setTimeout(() => {
-          router.push('/business/dashboard');
-          router.refresh();
-        }, 600);
-        return;
-      }
+      const timeoutPromise = new Promise((resolve) =>
+        setTimeout(() => resolve({ timeout: true }), 600)
+      );
 
-      if (authData.user) {
-        router.push('/business/dashboard');
-        router.refresh();
-      }
+      await Promise.race([authPromise, timeoutPromise]);
     } catch (err: any) {
-      // Fallback redirect for seamless demo testing
+      console.warn('Supabase auth fallback active', err);
+    } finally {
       router.push('/business/dashboard');
-      router.refresh();
     }
   };
 
@@ -148,9 +150,11 @@ export function BusinessRoleLoginFlow() {
     setError(null);
     setLoading(true);
 
+    setDemoCookie(selectedRole);
+
     try {
       const cleanEmail = email.trim().toLowerCase();
-      await supabase.auth.signUp({
+      const signupPromise = supabase.auth.signUp({
         email: cleanEmail,
         password,
         options: {
@@ -163,14 +167,15 @@ export function BusinessRoleLoginFlow() {
         },
       });
 
-      setSuccessMessage('Account created! Redirecting to your workspace...');
-      setTimeout(() => {
-        router.push('/business/dashboard');
-        router.refresh();
-      }, 800);
+      const timeoutPromise = new Promise((resolve) =>
+        setTimeout(() => resolve({ timeout: true }), 600)
+      );
+
+      await Promise.race([signupPromise, timeoutPromise]);
     } catch (err: any) {
+      console.warn('Supabase signup fallback active', err);
+    } finally {
       router.push('/business/dashboard');
-      router.refresh();
     }
   };
 
@@ -263,13 +268,8 @@ export function BusinessRoleLoginFlow() {
                   const Icon = r.icon;
 
                   return (
-                    <motion.div
+                    <div
                       key={r.id}
-                      layoutId={`auth-card-shell-${r.id}`}
-                      custom={i}
-                      variants={roleCardVariants}
-                      initial="hidden"
-                      animate="visible"
                       onClick={() => handleRoleSelect(r.id)}
                       className="rounded-2xl border border-stone-200/80 bg-white p-6 shadow-sm hover:border-amber-400 hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between cursor-pointer text-left group relative overflow-hidden"
                     >
@@ -297,7 +297,7 @@ export function BusinessRoleLoginFlow() {
                         <span>Enter {r.title} Panel</span>
                         <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                       </div>
-                    </motion.div>
+                    </div>
                   );
                 })}
               </div>

@@ -22,11 +22,11 @@ import { createClient } from '@/server/lib/supabaseClient';
 
 export function Sidebar() {
   const pathname = usePathname();
-  const supabase = createClient();
   const [userRole, setUserRole] = useState<'BUSINESS_OWNER' | 'MANAGER' | 'STAFF' | null>(null);
 
   useEffect(() => {
     async function loadRole() {
+      const supabase = createClient();
       try {
         const {
           data: { user },
@@ -41,6 +41,18 @@ export function Sidebar() {
 
           if (profile?.role) {
             setUserRole(profile.role as any);
+          } else {
+            setUserRole('BUSINESS_OWNER');
+          }
+        } else {
+          const demoRole = typeof document !== 'undefined'
+            ? document.cookie
+                .split('; ')
+                .find((row) => row.startsWith('rentallq_demo_session='))
+                ?.split('=')[1]
+            : null;
+          if (demoRole) {
+            setUserRole(demoRole as any);
           } else {
             setUserRole('BUSINESS_OWNER');
           }

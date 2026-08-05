@@ -7,11 +7,11 @@ import { Navbar } from '@/components/layout/Navbar';
 import { createClient } from '@/server/lib/supabaseClient';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const supabase = createClient();
   const [role, setRole] = useState<string | null>(null);
 
   useEffect(() => {
     async function checkRole() {
+      const supabase = createClient();
       try {
         const {
           data: { user },
@@ -26,7 +26,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           setRole(profile?.role || 'BUSINESS_OWNER');
         } else {
-          setRole('BUSINESS_OWNER');
+          const demoRole = typeof document !== 'undefined'
+            ? document.cookie
+                .split('; ')
+                .find((row) => row.startsWith('rentallq_demo_session='))
+                ?.split('=')[1]
+            : null;
+          setRole(demoRole || 'BUSINESS_OWNER');
         }
       } catch (err) {
         setRole('BUSINESS_OWNER');

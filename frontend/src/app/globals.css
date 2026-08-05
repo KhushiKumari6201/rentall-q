@@ -39,13 +39,18 @@
 
 @layer base {
   :root {
+    color-scheme: light;
     --background: 47 25% 93%;
     --foreground: 153 27% 12%;
   }
 
+  html {
+    color-scheme: light;
+  }
+
   body {
-    background-color: #F3F1E7;
-    color: #16261E;
+    background-color: #F3F1E7 !important;
+    color: #16261E !important;
     font-feature-settings: 'rlig' 1, 'calt' 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;

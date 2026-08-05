@@ -32,29 +32,48 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const pathname = request.nextUrl.pathname;
+  const demoCookie = request.cookies.get('rentallq_demo_session')?.value;
+  const isAuthenticated = Boolean(user || demoCookie);
+
+  // Check public routes that do NOT require auth protection
+  const isPublicRoute =
+    pathname === '/' ||
+    pathname === '/login' ||
+    pathname === '/register' ||
+    pathname.startsWith('/business/login') ||
+    pathname.startsWith('/business/register') ||
+    pathname.startsWith('/contact') ||
+    pathname.startsWith('/api/');
 
   // Protected route definitions
-  const isBusinessRoute = pathname.startsWith('/business');
+  const isBusinessRoute = pathname.startsWith('/business') && !isPublicRoute;
   const isAdminRoute = pathname.startsWith('/admin/dashboard');
-  const isClientRoute = pathname.startsWith('/dashboard') || pathname.startsWith('/my-payments') || pathname.startsWith('/request');
+  const isClientRoute =
+    (pathname.startsWith('/dashboard') || pathname.startsWith('/my-payments') || pathname.startsWith('/request')) &&
+    !isPublicRoute;
 
   // Unauthenticated user protection
-  if (!user && (isBusinessRoute || isAdminRoute || isClientRoute)) {
+  if (!isAuthenticated && (isBusinessRoute || isAdminRoute || isClientRoute)) {
     const url = request.nextUrl.clone();
-    url.pathname = '/login';
+    url.pathname = isBusinessRoute ? '/business/login' : '/login';
     return NextResponse.redirect(url);
   }
 
-  // Role-based protection for authenticated users
-  if (user) {
-    // Fetch profile role
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .maybeSingle();
+  // Role-based protection for authenticated/demo users
+  if (isAuthenticated) {
+    let role = 'BUSINESS_OWNER';
 
-    const role = profile?.role || 'BUSINESS_OWNER';
+    if (user) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      role = profile?.role || 'BUSINESS_OWNER';
+    } else if (demoCookie) {
+      role = demoCookie;
+    }
 
     // 1. Admin route protection
     if (isAdminRoute && role !== 'ADMIN') {
