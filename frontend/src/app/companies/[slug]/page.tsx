@@ -24,7 +24,7 @@ import {
   TrendingUp,
   Users,
   BoxSelect,
-  DollarSign,
+  IndianRupee,
   Search,
   Filter,
   LogIn,
@@ -155,7 +155,7 @@ function ActivityIcon({ type }: { type: string }) {
 
 // ─── Currency formatter ────────────────────────────────────────────────────────
 const fmt = (n: number) =>
-  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
+  new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n);
 
 const fmtDate = (d: string | null) =>
   d ? new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—';
@@ -322,7 +322,7 @@ function CompanyDetail({ company }: { company: MockCompany }) {
     {
       label: 'Monthly Revenue',
       value: fmt(company.monthlyRevenue),
-      icon: DollarSign,
+      icon: IndianRupee,
       sub: 'This month',
       color: 'text-amber-600',
       bg: 'bg-amber-50 border-amber-200',
@@ -575,7 +575,7 @@ function CompanyDetail({ company }: { company: MockCompany }) {
                   tick={{ fontSize: 10, fill: '#a8a29e' }}
                   axisLine={false}
                   tickLine={false}
-                  tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
+                  tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`}
                 />
                 <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f3f1e7' }} />
                 <Bar

@@ -204,7 +204,7 @@ const metroWare: MockCompany = {
     { month: "Jul '26", revenue: 122800 }, { month: "Aug '26", revenue: 124600 },
   ],
   activity: [
-    { id: 'a1', type: 'payment',     description: 'FoodBridge Co. paid $10,200 for Bay 07',        timestamp: '2026-08-01T10:20:00Z', actor: 'System' },
+    { id: 'a1', type: 'payment',     description: 'FoodBridge Co. paid ₹10,200 for Bay 07',        timestamp: '2026-08-01T10:20:00Z', actor: 'System' },
     { id: 'a2', type: 'maintenance', description: 'Bay 05 Hazmat area under scheduled inspection',  timestamp: '2026-07-31T07:00:00Z', actor: 'Compliance Team' },
     { id: 'a3', type: 'move_in',     description: 'FoodBridge Co. commenced Bay 07 occupancy',      timestamp: '2026-07-15T08:00:00Z', actor: 'Admin' },
     { id: 'a4', type: 'renewal',     description: 'Cryo-Logistics extended Bay 02 lease by 12 mo', timestamp: '2026-07-10T11:30:00Z', actor: 'Admin' },
@@ -253,7 +253,7 @@ const coLive: MockCompany = {
     { month: "Jul '26", revenue: 41400 }, { month: "Aug '26", revenue: 41800 },
   ],
   activity: [
-    { id: 'a1', type: 'payment',     description: 'Yuki Tanaka paid $950 for Bed 3A',            timestamp: '2026-08-02T08:45:00Z', actor: 'System' },
+    { id: 'a1', type: 'payment',     description: 'Yuki Tanaka paid ₹950 for Bed 3A',            timestamp: '2026-08-02T08:45:00Z', actor: 'System' },
     { id: 'a2', type: 'move_in',     description: 'Fiona Walsh checked into Bed 5A – Room 202',  timestamp: '2026-08-01T14:00:00Z', actor: 'Front Desk' },
     { id: 'a3', type: 'maintenance', description: 'Bed 4A mattress replacement scheduled',        timestamp: '2026-07-31T10:00:00Z', actor: 'Maintenance' },
     { id: 'a4', type: 'payment',     description: 'Claire Dupont payment 7 days overdue',         timestamp: '2026-08-01T09:00:00Z', actor: 'System' },
@@ -303,7 +303,7 @@ const parkEase: MockCompany = {
     { month: "Jul '26", revenue: 68600 }, { month: "Aug '26", revenue: 69500 },
   ],
   activity: [
-    { id: 'a1', type: 'payment',     description: 'Zara Hussain paid $210 for Spot P-006',          timestamp: '2026-08-02T10:00:00Z', actor: 'System' },
+    { id: 'a1', type: 'payment',     description: 'Zara Hussain paid ₹210 for Spot P-006',          timestamp: '2026-08-02T10:00:00Z', actor: 'System' },
     { id: 'a2', type: 'renewal',     description: 'Ryan Gallagher renewed permit PMT-9841 – 12 mo',  timestamp: '2026-08-01T09:30:00Z', actor: 'Admin' },
     { id: 'a3', type: 'maintenance', description: 'Spot P-005 drainage repair in progress',          timestamp: '2026-07-30T08:00:00Z', actor: 'Facilities' },
     { id: 'a4', type: 'payment',     description: 'Nina Okafor payment 10 days overdue',             timestamp: '2026-08-01T09:00:00Z', actor: 'System' },
@@ -351,7 +351,7 @@ const techRig: MockCompany = {
     { month: "Jul '26", revenue: 37900 }, { month: "Aug '26", revenue: 38400 },
   ],
   activity: [
-    { id: 'a1', type: 'payment',     description: 'CoreDrill Inc. paid $5,800 for EQ-006',           timestamp: '2026-08-02T11:00:00Z', actor: 'System' },
+    { id: 'a1', type: 'payment',     description: 'CoreDrill Inc. paid ₹5,800 for EQ-006',           timestamp: '2026-08-02T11:00:00Z', actor: 'System' },
     { id: 'a2', type: 'maintenance', description: 'EQ-005 Diesel Generator under full service',       timestamp: '2026-08-01T07:00:00Z', actor: 'Tech Team' },
     { id: 'a3', type: 'payment',     description: 'SkyTech Installs payment 14 days overdue',        timestamp: '2026-08-01T09:00:00Z', actor: 'System' },
     { id: 'a4', type: 'move_in',     description: 'LandForm Ltd. collected Mini Excavator EQ-008',   timestamp: '2026-07-20T09:00:00Z', actor: 'Yard Staff' },
@@ -401,7 +401,7 @@ const vaultBox: MockCompany = {
     { month: "Jul '26", revenue: 41900 }, { month: "Aug '26", revenue: 42300 },
   ],
   activity: [
-    { id: 'a1', type: 'payment',     description: 'Mei Suzuki paid $320 for Vault U-04',             timestamp: '2026-08-02T09:10:00Z', actor: 'System' },
+    { id: 'a1', type: 'payment',     description: 'Mei Suzuki paid ₹320 for Vault U-04',             timestamp: '2026-08-02T09:10:00Z', actor: 'System' },
     { id: 'a2', type: 'maintenance', description: 'Vault U-05 lock mechanism being replaced',         timestamp: '2026-07-31T11:00:00Z', actor: 'Maintenance' },
     { id: 'a3', type: 'move_in',     description: 'Kwame Asante moved into Vault U-08',              timestamp: '2026-07-25T10:00:00Z', actor: 'Staff' },
     { id: 'a4', type: 'payment',     description: 'Oscar Liu payment 12 days overdue',               timestamp: '2026-08-01T09:00:00Z', actor: 'System' },
